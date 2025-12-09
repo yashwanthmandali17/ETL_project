@@ -1,0 +1,23 @@
+import json
+from pathlib import Path
+from datetime import datetime
+import requests
+data_dir=Path(__file__).resolve().parents[1]/"data"/"raw"
+data_dir.mkdir(parents=True, exist_ok=True)
+def extract_weather_data(lat=17.3850,lon=78.4867,days=1):
+    url="https://api.open-meteo.com/v1/forecast"
+    params={
+        "latitude": lat,
+        "longitude": lon,
+        "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m",
+        "forecast_days": days,
+        "timezone": "auto"
+    }
+    resp=requests.get(url,params=params)    
+    resp.raise_for_status()
+    data=resp.json()
+    filename=data_dir/f"weather_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    filename.write_text(json.dumps(data,indent=2))
+    print(f"Extracted weather data saved to {filename}")
+if __name__=="__main__":
+    extract_weather_data()
